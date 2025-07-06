@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import react from '@vitejs/plugin-react-swc';
 import mkcert from 'vite-plugin-mkcert';
+import { resolve } from 'path';
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,12 +28,13 @@ export default defineConfig({
     process.env.HTTPS && mkcert(),
   ],
   build: {
-    target: 'esnext',
+  target: 'esnext',
+  outDir: 'dist',
+  rollupOptions: {
+    input: {
+      main: resolve(__dirname, 'index.html'),
+    },
   },
-  publicDir: './public',
-  server: {
-    // Exposes your dev server and makes it accessible for the devices in the same network.
-    host: true,
-  },
+},
 });
 
