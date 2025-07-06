@@ -133,11 +133,19 @@ export default function MapPage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="fixed inset-0 z-0 bg-white">
       <MapContainer
         center={MAP_CENTER}
         zoom={ZOOM_LEVEL}
         className="w-full h-full"
+=======
+    <div className="relative h-screen w-screen">
+      <MapContainer
+        center={MAP_CENTER}
+        zoom={ZOOM_LEVEL}
+        style={{ height: '100%', width: '100%' }}
+>>>>>>> parent of 6d30cf5 (Updated gamepage, mappage, vite.config)
         ref={mapRef}
       >
         <TileLayer
@@ -148,11 +156,15 @@ export default function MapPage() {
         <GarageMarker onClick={() => navigate('/garage')} />
 
         {wells.map((well) => (
+<<<<<<< HEAD
           <Marker
             key={well.id}
             position={[well.lat, well.lng] as [number, number]}
             icon={dummyWellIcon as any}
           >
+=======
+          <Marker key={well.id} position={[well.lat, well.lng] as [number, number]} icon={dummyWellIcon as any}>
+>>>>>>> parent of 6d30cf5 (Updated gamepage, mappage, vite.config)
             <Popup>
               <strong>{well.id}</strong>
               <br />
@@ -164,10 +176,14 @@ export default function MapPage() {
                 <>
                   <p className="mt-2 text-red-600 font-bold">🚨 This well is down!</p>
                   {truckStatus === 'idle' && (
+<<<<<<< HEAD
                     <button
                       onClick={handleDispatchTruck}
                       className="mt-2 bg-blue-600 text-white px-2 py-1 rounded"
                     >
+=======
+                    <button onClick={handleDispatchTruck} className="mt-2 bg-blue-600 text-white px-2 py-1 rounded">
+>>>>>>> parent of 6d30cf5 (Updated gamepage, mappage, vite.config)
                       Dispatch Truck
                     </button>
                   )}
@@ -183,12 +199,16 @@ export default function MapPage() {
 
       {truckStatus !== 'idle' && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded shadow-lg z-[1000]">
+<<<<<<< HEAD
           Truck Status:{' '}
           {truckStatus === 'toWell'
             ? '🚚 En Route'
             : truckStatus === 'repairing'
             ? '🛠 Repairing'
             : '↩ Returning'}
+=======
+          Truck Status: {truckStatus === 'toWell' ? '🚚 En Route' : truckStatus === 'repairing' ? '🛠 Repairing' : '↩ Returning'}
+>>>>>>> parent of 6d30cf5 (Updated gamepage, mappage, vite.config)
         </div>
       )}
     </div>
