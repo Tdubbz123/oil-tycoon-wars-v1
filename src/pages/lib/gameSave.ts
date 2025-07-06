@@ -13,6 +13,9 @@ export interface GameState {
   truckFleet: TruckUnit[]; // new
   wellsVisited: string[];
   lastPlayed: string;
+  xp: number;
+  truckUpgrades: { [truckName: string]: number };
+  mapSeed: string;
 }
 
 // Default state for new players
@@ -31,6 +34,11 @@ export const defaultGameState: GameState = {
   ],
   wellsVisited: [],
   lastPlayed: new Date().toISOString(),
+  xp: 0,
+  truckUpgrades: {
+    'Operator Pick-up Truck': 0,
+  },
+  mapSeed: '',
 };
 
 // Save game state to localStorage

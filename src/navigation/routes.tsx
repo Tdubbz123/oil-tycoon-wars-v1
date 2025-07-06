@@ -5,8 +5,7 @@ import { LaunchParamsPage } from '@/pages/LaunchParamsPage.tsx';
 import { ThemeParamsPage } from '@/pages/ThemeParamsPage.tsx';
 import { TONConnectPage } from '@/pages/TONConnectPage/TONConnectPage';
 import GamePage from '@/pages/GamePage.tsx';
-import MapPage from '@/pages/MapPage';
-import GaragePage from '@/pages/GaragePage';
+import GridMapPage from '@/pages/GridMapPage';
 import RedirectToGame from '@/pages/RedirectToGame'; // new
 
 interface Route {
@@ -22,8 +21,7 @@ export const routes: Route[] = [
   { path: '/theme-params', Component: ThemeParamsPage, title: 'Theme Params' },
   { path: '/launch-params', Component: LaunchParamsPage, title: 'Launch Params' },
   { path: '/game', Component: GamePage, title: 'Game' },
-  { path: '/map', Component: MapPage, title: 'Map' },
-  { path: '/garage', Component: GaragePage, title: 'Garage' },
+  { path: '/map', Component: GridMapPage, title: 'Map' },
   {
     path: '/ton-connect',
     Component: TONConnectPage,
