@@ -1,10 +1,9 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
-import { loadGameState, saveGameState, } from './lib/gameSave';
+import { loadGameState, saveGameState } from './lib/gameSave';
 
 const garageIcon = new L.Icon({
   iconUrl: '/assets/garage-icon.png',
@@ -134,64 +133,64 @@ export default function MapPage() {
   };
 
   return (
-  <div className="fixed inset-0 z-0">
-    <MapContainer
-      center={MAP_CENTER}
-      zoom={ZOOM_LEVEL}
-      className="w-full h-full"
-      ref={mapRef}
-    >
-      <TileLayer
-        attribution='&copy; OpenStreetMap contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <div className="fixed inset-0 z-0 bg-white">
+      <MapContainer
+        center={MAP_CENTER}
+        zoom={ZOOM_LEVEL}
+        className="w-full h-full"
+        ref={mapRef}
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      <GarageMarker onClick={() => navigate('/garage')} />
+        <GarageMarker onClick={() => navigate('/garage')} />
 
-      {wells.map((well) => (
-        <Marker
-          key={well.id}
-          position={[well.lat, well.lng] as [number, number]}
-          icon={dummyWellIcon as any}
-        >
-          <Popup>
-            <strong>{well.id}</strong>
-            <br />
-            Owner: {well.owner}
-            <br />
-            Daily: {well.dailyProduction} barrels
-            <br />
-            {brokenWell?.id === well.id && (
-              <>
-                <p className="mt-2 text-red-600 font-bold">🚨 This well is down!</p>
-                {truckStatus === 'idle' && (
-                  <button
-                    onClick={handleDispatchTruck}
-                    className="mt-2 bg-blue-600 text-white px-2 py-1 rounded"
-                  >
-                    Dispatch Truck
-                  </button>
-                )}
-              </>
-            )}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        {wells.map((well) => (
+          <Marker
+            key={well.id}
+            position={[well.lat, well.lng] as [number, number]}
+            icon={dummyWellIcon as any}
+          >
+            <Popup>
+              <strong>{well.id}</strong>
+              <br />
+              Owner: {well.owner}
+              <br />
+              Daily: {well.dailyProduction} barrels
+              <br />
+              {brokenWell?.id === well.id && (
+                <>
+                  <p className="mt-2 text-red-600 font-bold">🚨 This well is down!</p>
+                  {truckStatus === 'idle' && (
+                    <button
+                      onClick={handleDispatchTruck}
+                      className="mt-2 bg-blue-600 text-white px-2 py-1 rounded"
+                    >
+                      Dispatch Truck
+                    </button>
+                  )}
+                </>
+              )}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
 
-    {brokenWell && <WellDownButton onClick={handleWellDownClick} />}
-    <HUD coins={hud.coins} oil={hud.oil} level={hud.level} />
+      {brokenWell && <WellDownButton onClick={handleWellDownClick} />}
+      <HUD coins={hud.coins} oil={hud.oil} level={hud.level} />
 
-    {truckStatus !== 'idle' && (
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded shadow-lg z-[1000]">
-        Truck Status:{' '}
-        {truckStatus === 'toWell'
-          ? '🚚 En Route'
-          : truckStatus === 'repairing'
-          ? '🛠 Repairing'
-          : '↩ Returning'}
-      </div>
-    )}
-  </div>
-)
+      {truckStatus !== 'idle' && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-6 py-3 rounded shadow-lg z-[1000]">
+          Truck Status:{' '}
+          {truckStatus === 'toWell'
+            ? '🚚 En Route'
+            : truckStatus === 'repairing'
+            ? '🛠 Repairing'
+            : '↩ Returning'}
+        </div>
+      )}
+    </div>
+  );
 }
