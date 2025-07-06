@@ -107,6 +107,7 @@ const GridMapPage = () => {
     return () => clearInterval(interval);
   }, [mapGrid, mapReady]);
 
+  {/* generate initial map */}
   return (
   <div className="p-4">
     {!mapReady ? (
@@ -140,6 +141,7 @@ const GridMapPage = () => {
           )}
         </div>
 
+        {/* force a well to simulate a breakdown event */}
         <button
           onClick={() => {
             const options = mapGrid.flat().filter(t => t.wells.length > 0);
@@ -158,9 +160,8 @@ const GridMapPage = () => {
 
 
         {/* Map Grid */}
-        <div 
-          ref={mapContainerRef} 
-          className="mt-4 grid grid-cols-6 gap-1">
+          <div ref={mapContainerRef} className="mt-4 max-h-[500px] overflow-auto border border-gray-300">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(48px,1fr))] gap-1">
           {mapGrid.flat().map(tile => (
             <div 
               key={`${tile.x}-${tile.y}`}
@@ -196,48 +197,34 @@ const GridMapPage = () => {
             </div>
           ))}
         </div>
+      </div>
 
               {/* 🛢️ Well Info Modal */}
               {selectedWell && selectedTile && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                <div className="bg-white p-4 rounded shadow-xl w-80 max-w-full relative">
-                <h2 className="text-lg font-bold mb-2">Well Info</h2>
-                <p>Status: {
-                  truckPhase === 'repairing' && truckPos.x === selectedTile.x && truckPos.y === selectedTile.y
-                    ? 'Being Repaired'
-                    : selectedWell.isBroken
-                    ? 'Broken'
-                    : 'Running'
-                  }
-                </p>
-              <p>Barrels/Day: {selectedWell.barrelsPerDay || 0}</p>
-
-              <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setSelectedWell(null);
-                  setSelectedTile(null);
-                }}
-                className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedWell(null);
-                  setSelectedTile(null);
-                  handleRepair(selectedWell);
-                }}
-                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-              >
-                Repair This Well
-              </button>
-            </div>
-          </div>
-        </div>
-      )}       
-    </>
-  )}
+                <div className="fixed bottom-4 left-4 z-50">
+                  <button
+                    onClick={() => {
+                      alert(
+                        `Well Info\n\nStatus: ${
+                          truckPhase === 'repairing' && truckPos.x === selectedTile.x && truckPos.y === selectedTile.y
+                            ? 'Being Repaired'
+                            : selectedWell.isBroken
+                            ? 'Broken'
+                            : 'Running'
+                          }\nBarrels/Day: ${selectedWell.barrelsPerDay || 0}`
+                        );
+                        handleRepair(selectedWell);
+                        setSelectedWell(null);
+                        setSelectedTile(null);
+                      }}
+                      className="bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700"
+                    >
+                      🛠 Repair This Well
+                    </button>
+                  </div>
+                )}
+      </>
+    )}
   </div>
   );
 };
