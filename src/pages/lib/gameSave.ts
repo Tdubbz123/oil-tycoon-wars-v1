@@ -9,8 +9,8 @@ export interface GameState {
   coins: number;
   oil: number;
   playerLevel: number;
-  ownedTrucks: string[]; // still used for UI counting, optional
-  truckFleet: TruckUnit[]; // new
+  ownedTrucks: string[]; 
+  truckFleet: TruckUnit[]; 
   wellsVisited: string[];
   lastPlayed: string;
   xp: number;
@@ -27,17 +27,30 @@ export const defaultGameState: GameState = {
   truckFleet: [
     {
       id: 'TRUCK-1',
-      name: 'Batch Truck',
+      name: 'Operator Pick-up Truck',
       wellsRepaired: 0,
       kmDriven: 0,
     },
   ],
+  truckUpgrades: {
+  'Operator Pick-up Truck': 0,
+  'Batch Truck': 0,
+  'Mobile Repair Unit': 0,
+  'Pressure Pump Truck': 0,
+  'Steamer': 0,
+  'Chemical Delivery Truck': 0,
+  'Vacuum Truck': 0,
+  'Water Truck': 0,
+  'Trailer-Vac': 0,
+  'Hot Shot Truck': 0,
+  'Combo Unit': 0,
+  'Flush-by': 0,
+  'Rod Truck': 0,
+  'Service Rig': 0,
+  },
   wellsVisited: [],
   lastPlayed: new Date().toISOString(),
   xp: 0,
-  truckUpgrades: {
-    'Operator Pick-up Truck': 0,
-  },
   mapSeed: '',
 };
 

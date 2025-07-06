@@ -104,8 +104,8 @@ export function useMapGenerator(): GridTile[][] {
 
     setGrid(newGrid);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newGrid));
-  }, []);
-
+    console.log('Generated newGrid:', newGrid);
+    }, []);
   return grid;
 }
 

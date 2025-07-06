@@ -1,145 +1,196 @@
-
-import { useEffect, useRef, useState } from 'react';
-import { useMapGenerator } from '../hooks/mapGenerator';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadGameState } from '../pages/lib/gameSave';
+import { loadGameState, saveGameState } from '../pages/lib/gameSave';
 import { useTruckRepair } from '../hooks/useTruckRepair';
+import { useMapGenerator } from '../hooks/mapGenerator';
+import { Well, GridTile } from '../hooks/mapGenerator';
+import { TruckData } from '../Data/trucks'
 
-const WellIcon = ({ broken }: { broken: boolean }) => (
-  <div className={broken ? 'text-red-600' : 'text-green-500'}>📍</div>
-);
-const GarageIcon = () => <div className="text-gray-700">🏠</div>;
-const CompassIcon = () => <span className="text-white">🧭</span>;
-const ZoomInIcon = () => <span className="text-white text-lg">＋</span>;
-const ZoomOutIcon = () => <span className="text-white text-lg">－</span>;
-
-export default function GridMapPage() {
-  const initialGrid = useMapGenerator();
-  const [mapGrid, setMapGrid] = useState(initialGrid);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(1);
-
-  const navigate = useNavigate();
-
+const GridMapPage = () => {
+  const [mapGrid, setMapGrid] = useState<GridTile[][]>([]);
+  const [mapReady, setMapReady] = useState(false);
   const [hud, setHud] = useState(() => {
     const state = loadGameState();
     return {
       coins: state.coins || 0,
       xp: state.xp || 0,
       level: state.playerLevel || 1,
+      brokenCount: 0,
     };
   });
 
-  const { dispatchTruckToRepair, status } = useTruckRepair();
+  const [truckPhase, setTruckPhase] = useState<'idle' | 'drivingTo' | 'repairing' | 'returning'>('idle');
+  const [truckPos, setTruckPos] = useState({ x: 0, y: 0 });
+  const { status, dispatchTruckToRepair } = useTruckRepair();
+  const navigate = useNavigate();
 
-  const [garageCoords, setGarageCoords] = useState<{ x: number; y: number } | null>(null);
+  const generate = useMapGenerator();
+
+  const handleGenerateMap = () => {
+  const newGrid = generate; // ✅ call the function, not the hook
+
+    setMapGrid(newGrid);
+    setMapReady(true);
+    const brokenCount = newGrid.flat().reduce(
+      (acc, tile) => acc + tile.wells.filter(w => w.isBroken).length,
+      0
+    );
+    setHud(prev => ({ ...prev, brokenCount }));
+  };
+
+  const handleRepair = (well: Well, tileX: number, tileY: number) => {
+    if (!well.isBroken || status !== 'idle' || truckPhase !== 'idle') return;
+
+    const garageTile = mapGrid.flat().find(t => t.isGarage);
+    if (!garageTile) return;
+
+    const dist = Math.abs(tileX - garageTile.x) + Math.abs(tileY - garageTile.y);
+    const state = loadGameState();
+    const truck = state.truckFleet[0];
+    const upgradeLevel = state.truckUpgrades?.[truck.name] || 0;
+    const truckStats = TruckData.find(t => t.name === truck.name);
+    if (!truckStats) return;
+    const { speed } = truckStats.stats; 
+    const speedMultiplier = 1 + upgradeLevel * 0.05;
+    const adjustedSpeed = speed * speedMultiplier;
+    const travelTime = Math.floor(2000 * (dist / adjustedSpeed));
+    const repairTime = 4000;
+
+    setTruckPhase('drivingTo');
+    setTruckPos({ x: garageTile.x, y: garageTile.y });
+
+    setTimeout(() => {
+      setTruckPhase('repairing');
+      setTruckPos({ x: tileX, y: tileY });
+
+      setTimeout(() => {
+        setTruckPhase('returning');
+        setTruckPos({ x: tileX, y: tileY });
+
+        setTimeout(() => {
+          well.isBroken = false;
+          setMapGrid([...mapGrid]);
+
+          const baseCoins = truckStats.stats.baseReward;
+          const baseXp = truckStats.stats.baseXp;
+
+          const coinMultiplier = 1 + (upgradeLevel * 0.05); // +5% per upgrade level
+          const xpMultiplier = 1 + (upgradeLevel * 0.05);
+
+          const coinsEarned = Math.floor(baseCoins * coinMultiplier);
+          const xpEarned = Math.floor(baseXp * xpMultiplier);
+
+          dispatchTruckToRepair(well, () => {
+            const updatedState = loadGameState();
+            setHud(prev => ({
+              coins: prev.coins + coinsEarned,
+              xp: prev.xp + xpEarned,
+              level: updatedState.playerLevel,
+              brokenCount: mapGrid.flat().reduce(
+                (acc, tile) => acc + tile.wells.filter(w => w.isBroken).length,
+                0
+              ),
+            }));
+            saveGameState(updatedState);
+          });
+
+          setMapGrid([...mapGrid]);
+          setTruckPhase('idle');
+        }, travelTime);
+      }, repairTime);
+    }, travelTime);
+  };
 
   useEffect(() => {
-    for (let row of mapGrid) {
-      for (let tile of row) {
-        if (tile.isGarage) {
-          setGarageCoords({ x: tile.x, y: tile.y });
-          return;
-        }
-      }
-    }
+    const brokenCount = mapGrid.flat().reduce(
+      (acc, tile) => acc + tile.wells.filter(w => w.isBroken).length,
+      0
+    );
+    setHud(prev => ({ ...prev, brokenCount }));
   }, [mapGrid]);
 
-  // Random breakdown every 60–120s
   useEffect(() => {
+    if (!mapReady) return;
+
     const interval = setInterval(() => {
       const flat = mapGrid.flat();
       const options = flat.filter(t => t.wells.length > 0);
       const tile = options[Math.floor(Math.random() * options.length)];
-      if (tile) {
-        const goodWells = tile.wells.filter(w => !w.isBroken);
-        if (goodWells.length > 0) {
-          const w = goodWells[Math.floor(Math.random() * goodWells.length)];
-          w.isBroken = true;
-          setMapGrid([...mapGrid]);
-        }
-      }
+      if (!tile) return;
+      const goodWells = tile.wells.filter(w => !w.isBroken);
+      if (goodWells.length === 0) return;
+      const w = goodWells[Math.floor(Math.random() * goodWells.length)];
+      w.isBroken = true;
+      setMapGrid([...mapGrid]);
     }, 60000 + Math.random() * 60000);
+
     return () => clearInterval(interval);
-  }, [mapGrid]);
+  }, [mapGrid, mapReady]);
 
-  const scrollToGarage = () => {
-    if (!containerRef.current || !garageCoords) return;
-    const tileSize = 64 * zoom;
-    containerRef.current.scrollTo({
-      top: garageCoords.y * tileSize - 200,
-      left: garageCoords.x * tileSize - 300,
-      behavior: 'smooth',
-    });
-  };
-
-  const zoomIn = () => setZoom(prev => Math.min(prev + 0.25, 2));
-  const zoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5));
-
-  return (
-    <div className="relative h-screen w-screen">
-      {/* HUD Bar */}
-      <div className="fixed top-0 left-0 w-full bg-black text-white px-4 py-2 z-50 flex justify-between items-center">
-        <span>💰 {hud.coins}</span>
-        <span>⭐ Level {hud.level} — XP: {hud.xp}</span>
-        <div className="flex gap-2">
-          <button onClick={scrollToGarage} className="bg-blue-600 px-2 rounded"><CompassIcon /></button>
-          <button onClick={zoomOut} className="bg-gray-600 px-2 rounded"><ZoomOutIcon /></button>
-          <button onClick={zoomIn} className="bg-gray-600 px-2 rounded"><ZoomInIcon /></button>
+   return (
+    <div className="p-4">
+      {!mapReady && (
+        <div className="text-center">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={handleGenerateMap}
+          >
+            Generate Map
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Map Grid */}
-      <div
-        ref={containerRef}
-        className="absolute top-12 bottom-0 left-0 right-0 overflow-scroll bg-green-50"
-      >
-        <div
-          className="grid"
-          style={{
-            transform: `scale(${zoom})`,
-            transformOrigin: 'top left',
-            gridTemplateColumns: `repeat(${mapGrid[0]?.length || 0}, 64px)`,
-            gridAutoRows: '64px',
-            width: `${mapGrid[0]?.length * 64}px`,
-          }}
-        >
-          {mapGrid.flat().map(tile => (
-            <div
-              key={`${tile.x}-${tile.y}`}
-              className="border border-gray-400 flex flex-col items-center justify-center text-xs bg-white relative"
-              title={tile.lsdName}
-            >
-              {tile.isGarage && (
-                <div onClick={() => navigate('/garage')} className="cursor-pointer">
-                  <GarageIcon />
-                </div>
-              )}
-
-              {tile.wells.map(well => (
-                <button
-                  key={well.id}
-                  onClick={() => {
-                    if (!well.isBroken || status !== 'idle') return;
-                    dispatchTruckToRepair(well, (coinsEarned, xpEarned) => {
-                      setHud(prev => ({
-                        ...prev,
-                        coins: prev.coins + coinsEarned,
-                        xp: prev.xp + xpEarned,
-                        level: loadGameState().playerLevel,
-                      }));
-                    });
-                  }}
-                  disabled={!well.isBroken || status !== 'idle'}
-                  className={`mt-1 ${!well.isBroken || status !== 'idle' ? 'opacity-40 cursor-not-allowed' : ''}`}
-                >
-                  <WellIcon broken={well.isBroken} />
-                </button>
-              ))}
+      {mapReady && (
+        <div>
+          <div className="flex justify-between items-center bg-gray-900 text-white p-2 text-sm">
+            <div onClick={() => alert(`Total Coins: ${hud.coins}`)} className="cursor-pointer">
+              🪙 {hud.coins}
             </div>
-          ))}
-        </div>
+            <div
+              onClick={() => alert(`Broken Wells: ${hud.brokenCount}`)}
+              className="cursor-pointer"
+            >
+              💥 {hud.brokenCount} Wells Down
+            </div>
+            <div onClick={() => alert(`Player Level: ${hud.level}`)} className="cursor-pointer">
+              ⭐ Level {hud.level} — XP: {hud.xp}
+            </div>
+          </div>
+
+      <div className="mt-4 grid grid-cols-6 gap-1">
+        {mapGrid.flat().map(tile => (
+          <div
+            key={`${tile.x}-${tile.y}`}
+            className="border border-black p-1 text-xs bg-white flex flex-col items-center justify-center relative"
+            title={tile.lsdName}
+          >
+            {tile.isGarage && (
+              <div onClick={() => navigate('/garage')} className="cursor-pointer text-2xl">
+                🏡
+              </div>
+            )}
+
+            {tile.wells.map(well => (
+              <button
+                key={well.id}
+                onClick={() => handleRepair(well, tile.x, tile.y)}
+                disabled={!well.isBroken || truckPhase !== 'idle'}
+                className={`mt-1 ${!well.isBroken || truckPhase !== 'idle' ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
+                <span>{well.isBroken ? '🟥' : '🟩'}</span>
+              </button>
+            ))}
+
+            {truckPos?.x === tile.x && truckPos?.y === tile.y && (
+              <div className="absolute top-0 right-0 text-lg">🚚</div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
-  );
-}
+      )};
+    </div>
+    );  
+  };
+
+export default GridMapPage
