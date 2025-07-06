@@ -13,6 +13,7 @@ import './index.css';
 
 // Mock the environment in case, we are outside Telegram.
 import './mockEnv.ts';
+import { HashRouter as Router } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
@@ -31,8 +32,10 @@ try {
     .then(() => {
       root.render(
         <StrictMode>
-          <Root/>
-        </StrictMode>,
+        <Router>
+        <Root />
+        </Router>
+        </StrictMode>
       );
     });
 } catch (e) {
