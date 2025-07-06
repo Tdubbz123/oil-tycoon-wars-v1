@@ -43,9 +43,9 @@ export default function GamePage() {
   return (
     <div className="flex flex-col w-full max-w-sm mx-auto min-h-[90vh] bg-white">
       <img
-        src="/oil-tycoon-wars-v1/assets/oil-tycoon-wars-portrait.png"
+        src="/oil-tycoon-wars-v1/oil-tycoon-logo.png"
         alt="Oil Tycoon Wars"
-        className="w-full h-auto"
+        className="w-full max-w-[300px] h-auto mx-auto my-4"
       />
 
       <h1 className="text-4xl font-bold mb-2 text-center">OIL TYCOON WARS</h1>
