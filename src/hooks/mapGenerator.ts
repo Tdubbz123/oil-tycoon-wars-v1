@@ -4,7 +4,7 @@ import { loadGameState, saveGameState } from '../pages/lib/gameSave';
 export interface Well {
   id: string;
   lsd: string;
-  productionRate: number;
+  barrelsPerDay: number;
   isBroken: boolean;
 }
 
@@ -79,7 +79,7 @@ export function useMapGenerator(): GridTile[][] {
               wells.push({
                 id: `WELL-${lsdName}-${i + 1}`,
                 lsd: lsdName,
-                productionRate: Math.floor(rand() * 200) + 100,
+                barrelsPerDay: Math.floor(rand() * 200) + 100,
                 isBroken: false,
               });
             }

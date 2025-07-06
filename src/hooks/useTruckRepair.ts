@@ -3,10 +3,10 @@ import { loadGameState, saveGameState } from '../pages/lib/gameSave';
 import { Well } from '../hooks/mapGenerator';
 import { TruckData } from '../Data/trucks';
 
-export type TruckStatus = 'idle' | 'toWell' | 'repairing' | 'returning';
+export type TruckPhase = 'idle' | 'toWell' | 'repairing' | 'returning';
 
 interface UseTruckRepairReturn {
-  status: TruckStatus;
+  status: TruckPhase;
   dispatchTruckToRepair: (well: Well, onComplete?: (coins: number, xp: number) => void) => void;
   repairingWell: Well | null;
 }
@@ -15,14 +15,14 @@ interface UseTruckRepairReturn {
  * Handles truck repair logic with XP/coin rewards, speed scaling, and dynamic upgrades.
  */
 export function useTruckRepair(): UseTruckRepairReturn {
-  const [status, setStatus] = useState<TruckStatus>('idle');
+  const [status, setStatus] = useState<TruckPhase>('idle');
   const [repairingWell, setRepairingWell] = useState<Well | null>(null);
 
   const dispatchTruckToRepair = (well: Well, onComplete?: (coins: number, xp: number) => void) => {
     if (!well || status !== 'idle') return;
 
     const state = loadGameState();
-    const truck = state.truckFleet[0];
+    const truck = state.truckFleet.find(t => t.name === state.activeTruckName) || state.truckFleet[0];
     const upgradeLevel = state.truckUpgrades[truck.name] || 0;
     const truckStats = TruckData.find(t => t.name === truck.name);
     if (!truckStats) return;
@@ -42,12 +42,18 @@ export function useTruckRepair(): UseTruckRepairReturn {
 
     setStatus('toWell');
     setRepairingWell(well);
+    console.log('🚛 Driving to well...');
 
     setTimeout(() => {
+      console.log('🛠️ Arrived. Starting repair...');
       setStatus('repairing');
+      
       setTimeout(() => {
+        console.log('✅ Repair done. Returning to garage...');
         setStatus('returning');
+        
         setTimeout(() => {
+          console.log('🏠 Back at garage. Updating state...');
           setStatus('idle');
           setRepairingWell(null);
 
@@ -63,9 +69,12 @@ export function useTruckRepair(): UseTruckRepairReturn {
 
           if (state.xp >= state.playerLevel * 100) {
             state.playerLevel++;
+            console.log(`⬆️ Leveled up! Now level ${state.playerLevel}`);
           }
 
           saveGameState(state);
+          console.log(`💾 Game saved. Coins: ${state.coins}, XP: ${state.xp}`);
+          
           if (onComplete) onComplete(coinsEarned, xpEarned);
         }, returnTime);
       }, repairTime);

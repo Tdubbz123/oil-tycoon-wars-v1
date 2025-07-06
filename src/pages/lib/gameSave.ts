@@ -11,6 +11,7 @@ export interface GameState {
   playerLevel: number;
   ownedTrucks: string[]; 
   truckFleet: TruckUnit[]; 
+  activeTruckName: string;
   wellsVisited: string[];
   lastPlayed: string;
   xp: number;
@@ -32,8 +33,9 @@ export const defaultGameState: GameState = {
       kmDriven: 0,
     },
   ],
+  activeTruckName: 'Operator Pick-up Truck',
   truckUpgrades: {
-  'Operator Pick-up Truck': 0,
+  'Operator Pick-up Truck': 1,
   'Batch Truck': 0,
   'Mobile Repair Unit': 0,
   'Pressure Pump Truck': 0,

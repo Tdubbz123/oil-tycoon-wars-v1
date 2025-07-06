@@ -6,7 +6,7 @@ export interface Truck {
     speed: number;         // affects travel/return time
     repairBoost: number;  // per upgrade level (e.g., 0.1 = +10%)
     baseReward: number;   // base coins earned per repair
-    baseXp: number;       // base XP earned per repair
+    baseXp: number;       // base XP earned per repair'
   };
 }
 
@@ -19,7 +19,7 @@ export const TruckData: Truck[] = [
       speed: 80,
       repairBoost: 0.05,
       baseReward: 25,
-      baseXp: 5,
+      baseXp: 5, 
     },
   },
   {
