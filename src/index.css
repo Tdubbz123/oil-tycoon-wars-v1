@@ -25,3 +25,18 @@ body {
   0%   { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(-32px); opacity: 0; }
 }
+
+/* remove the white square, border, shadow, etc */
+.transparent-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  /* make sure it still sizes itself to the emoji */
+  width: auto !important;
+  height: auto !important;
+}
+
+/* you may also want to kill the little anchor-container <img> */
+.transparent-div-icon .leaflet-div-icon:before {
+  content: none !important;
+}
