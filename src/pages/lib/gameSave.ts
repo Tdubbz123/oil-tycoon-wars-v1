@@ -1,3 +1,6 @@
+import type { Well } from '../../Data/types';
+
+
 export interface TruckUnit {
   id: string;
   name: string;
@@ -9,9 +12,10 @@ export interface GameState {
   coins: number;
   oil: number;
   playerLevel: number;
-  ownedTrucks: string[]; 
-  truckFleet: TruckUnit[]; 
+  ownedTrucks: string[];
+  truckFleet: TruckUnit[];
   activeTruckName: string;
+  wells: Well[];
   wellsVisited: string[];
   lastPlayed: string;
   xp: number;
@@ -35,21 +39,22 @@ export const defaultGameState: GameState = {
   ],
   activeTruckName: 'Operator Pick-up Truck',
   truckUpgrades: {
-  'Operator Pick-up Truck': 1,
-  'Batch Truck': 0,
-  'Mobile Repair Unit': 0,
-  'Pressure Pump Truck': 0,
-  'Steamer': 0,
-  'Chemical Delivery Truck': 0,
-  'Vacuum Truck': 0,
-  'Water Truck': 0,
-  'Trailer-Vac': 0,
-  'Hot Shot Truck': 0,
-  'Combo Unit': 0,
-  'Flush-by': 0,
-  'Rod Truck': 0,
-  'Service Rig': 0,
+    'Operator Pick-up Truck': 1,
+    'Batch Truck': 0,
+    'Mobile Repair Unit': 0,
+    'Pressure Pump Truck': 0,
+    'Steamer': 0,
+    'Chemical Delivery Truck': 0,
+    'Vacuum Truck': 0,
+    'Water Truck': 0,
+    'Trailer-Vac': 0,
+    'Hot Shot Truck': 0,
+    'Combo Unit': 0,
+    'Flush-by': 0,
+    'Rod Truck': 0,
+    'Service Rig': 0,
   },
+  wells: [],
   wellsVisited: [],
   lastPlayed: new Date().toISOString(),
   xp: 0,

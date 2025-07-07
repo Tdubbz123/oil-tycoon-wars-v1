@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { loadGameState, saveGameState } from '../pages/lib/gameSave';
-import { Well } from '../hooks/mapGenerator';
+import { Well } from '../Data/types';
 import { TruckData } from '../Data/trucks';
 
 export type TruckPhase = 'idle' | 'toWell' | 'repairing' | 'returning';
